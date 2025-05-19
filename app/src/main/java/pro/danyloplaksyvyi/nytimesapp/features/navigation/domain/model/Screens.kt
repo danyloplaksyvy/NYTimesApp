@@ -1,4 +1,4 @@
-package pro.danyloplaksyvyi.nytimesapp.features.navigation.domain
+package pro.danyloplaksyvyi.nytimesapp.features.navigation.domain.model
 
 enum class Screens {
     // Auth
