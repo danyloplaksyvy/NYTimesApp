@@ -6,14 +6,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view.CategoriesScreen
 import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view.details.CategoryDetailsScreen
-import pro.danyloplaksyvyi.nytimesapp.features.navigation.domain.Screens
+import pro.danyloplaksyvyi.nytimesapp.features.navigation.domain.model.Screens
+import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 
-fun NavGraphBuilder.mainNavGraph(navController: NavController) {
+fun NavGraphBuilder.mainNavGraph(navController: NavController, authViewModel: AuthViewModel) {
     navigation(route = Graph.MAIN, startDestination = Screens.CategoriesScreen.name) {
         composable(route = Screens.CategoriesScreen.name) {
-            CategoriesScreen(onSignOutClick = {navController.navigate(Graph.AUTH)}, onCategoryClick =  {
-                navController.navigate(Screens.CategoryDetailsScreen.name)
-            })
+            CategoriesScreen(navController, authViewModel)
         }
         composable(route = Screens.CategoryDetailsScreen.name) {
             CategoryDetailsScreen {

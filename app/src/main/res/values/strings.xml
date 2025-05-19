@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">NYTimesApp</string>
+    <string name="app_name">Bookio</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_failed">Sign in failed</string>
+    <string name="sign_out_failed">Sign out failed</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

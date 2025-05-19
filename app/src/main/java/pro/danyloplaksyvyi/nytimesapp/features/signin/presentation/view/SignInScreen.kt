@@ -1,9 +1,11 @@
-package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view
+package pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.view
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,40 +15,43 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import pro.danyloplaksyvyi.nytimesapp.features.navigation.domain.model.Screens
+import pro.danyloplaksyvyi.nytimesapp.R
 import pro.danyloplaksyvyi.nytimesapp.features.navigation.presentation.Graph
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.model.SignInState
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 
 @Composable
-fun CategoriesScreen(navController: NavController, authViewModel: AuthViewModel) {
+fun SignInScreen(navController: NavController, authViewModel: AuthViewModel) {
     val signInState by authViewModel.signInState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(signInState) {
         when (signInState) {
+            is SignInState.Success -> {
+                navController.navigate(Graph.MAIN) {
+                    popUpTo(Graph.AUTH) { inclusive = true }
+                }
+            }
             is SignInState.Error -> {
                 snackbarHostState.showSnackbar((signInState as SignInState.Error).message)
             }
-
-            is SignInState.Idle -> {
-                navController.navigate(Graph.AUTH) {
-                    popUpTo(Graph.MAIN) { inclusive = true }
-                }
-            }
-
-            else -> {}
+            else -> { /* Do nothing */ }
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = { navController.navigate(Screens.CategoryDetailsScreen.name) }) {
-                Text("Go to category")
-            }
-            Button(onClick = { authViewModel.signOut() }) {
-                Text("SignOut")
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(onClick = { authViewModel.signIn() }) {
+                Text(stringResource(R.string.sign_in_with_google))
             }
         }
     }
