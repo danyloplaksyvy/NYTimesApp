@@ -5,4 +5,5 @@
     <string name="sign_in_failed">Помилка авторизації</string>
     <string name="sign_out_failed">Помилка виходу з акаунту</string>
     <string name="unknown_error">Невідома помилка</string>
+    <string name="welcome_message">Вітаємо у Bookio!</string>
 </resources>

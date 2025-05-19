@@ -4,4 +4,5 @@
     <string name="sign_in_failed">Sign in failed</string>
     <string name="sign_out_failed">Sign out failed</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="welcome_message">Welcome to the Bookio!</string>
 </resources>
