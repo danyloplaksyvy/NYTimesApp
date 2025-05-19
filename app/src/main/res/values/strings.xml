@@ -4,4 +4,15 @@
     <string name="sign_in_failed">Sign in failed</string>
     <string name="sign_out_failed">Sign out failed</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="welcome_message">Welcome to the Bookio!</string>
+    <string name="book_categories">Book Categories</string>
+    <string name="current_lists_as_of">Current lists as of %s</string>
+    <string name="published_date">Published: %s</string>
+    <string name="books_in_category">Books in %s</string>
+    <string name="back">Back</string>
+    <string name="book_cover_description">Cover of %s</string>
+    <string name="author">Author: %s</string>
+    <string name="publisher">Publisher: %s</string>
+    <string name="rank">Rank: %s</string>
+    <string name="buy">Buy</string>
 </resources>

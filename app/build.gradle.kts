@@ -57,6 +57,7 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.navigation.compose.android)
+    implementation(libs.androidx.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
@@ -73,6 +74,9 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.insert.koin.koin.core)
     implementation(libs.koin.androidx.compose)
+
+    // Material Icons
+    implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

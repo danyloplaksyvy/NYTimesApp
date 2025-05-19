@@ -5,4 +5,15 @@
     <string name="sign_in_failed">Помилка авторизації</string>
     <string name="sign_out_failed">Помилка виходу з акаунту</string>
     <string name="unknown_error">Невідома помилка</string>
+    <string name="welcome_message">Вітаємо у Bookio!</string>
+    <string name="book_categories">Категорії книжок</string>
+    <string name="current_lists_as_of">Поточний список з %s</string>
+    <string name="published_date">Опубліковано: %s</string>
+    <string name="books_in_category">Книги в категорії %s</string>
+    <string name="back">Назад</string>
+    <string name="book_cover_description">Обкладинка %s</string>
+    <string name="author">Автор: %s</string>
+    <string name="publisher">Видавець: %s</string>
+    <string name="rank">Ранг: %s</string>
+    <string name="buy">Купити</string>
 </resources>

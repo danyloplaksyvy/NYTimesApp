@@ -18,7 +18,7 @@ import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.Aut
 fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
     val rootNavController = rememberNavController()
     NavHost(
-        modifier = modifier,
+//        modifier = modifier,
         route = Graph.ROOT,
         startDestination = Graph.SPLASH,
         navController = rootNavController
