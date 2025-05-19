@@ -21,12 +21,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val authViewModel: AuthViewModel = koinViewModel()
             NYTimesAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     RootNavigationGraph(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(),
                         authViewModel
                     )
-                }
             }
         }
     }

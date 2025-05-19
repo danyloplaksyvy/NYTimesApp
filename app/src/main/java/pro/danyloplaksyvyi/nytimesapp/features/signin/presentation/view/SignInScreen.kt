@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -108,7 +109,7 @@ fun SignInScreen(navController: NavController, authViewModel: AuthViewModel) {
                         .padding(16.dp)
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.signinimage),
+                    painter = painterResource(id = if (isSystemInDarkTheme()) R.drawable.signinimagedark else R.drawable.signinimage),
                     contentDescription = "Sign In Image",
                     modifier = Modifier
                         .size(312.dp)
@@ -125,8 +126,7 @@ fun SignInScreen(navController: NavController, authViewModel: AuthViewModel) {
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
-                    modifier = Modifier
-                            ,
+                    modifier = Modifier,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(stringResource(R.string.sign_in_with_google))
