@@ -24,7 +24,6 @@ class MainActivity : ComponentActivity() {
             val booksByListViewModel: BooksByListViewModel = koinViewModel()
             NYTimesAppTheme {
                 RootNavigationGraph(
-                    modifier = Modifier.padding(),
                     authViewModel,
                     overviewViewModel,
                     booksByListViewModel
