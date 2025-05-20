@@ -1,22 +1,23 @@
 package pro.danyloplaksyvyi.nytimesapp.features.navigation.presentation
 
-import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ComponentActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.koin.android.ext.android.inject
-import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.booksbylist.BooksByListViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview.OverviewViewModel
 
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.view.SplashScreen
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 
 @Composable
-fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel, overviewViewModel: OverviewViewModel) {
+fun RootNavigationGraph(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    overviewViewModel: OverviewViewModel,
+    booksByListViewModel: BooksByListViewModel
+) {
     val rootNavController = rememberNavController()
     NavHost(
 //        modifier = modifier,
@@ -28,7 +29,7 @@ fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewMo
             SplashScreen(authViewModel, rootNavController)
         }
         authNavGraph(rootNavController, authViewModel)
-        mainNavGraph(rootNavController, authViewModel, overviewViewModel)
+        mainNavGraph(rootNavController, authViewModel, overviewViewModel, booksByListViewModel)
     }
 }
 

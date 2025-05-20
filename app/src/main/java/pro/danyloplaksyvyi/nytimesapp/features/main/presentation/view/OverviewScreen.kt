@@ -1,5 +1,6 @@
 package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CollectionsBookmark
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,13 +46,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import pro.danyloplaksyvyi.nytimesapp.R
-import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.BookList
-import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.Results
-import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewUiState
-import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.overview.BookList
+import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.overview.Results
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview.OverviewUiState
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview.OverviewViewModel
 import pro.danyloplaksyvyi.nytimesapp.features.navigation.presentation.Graph
 import pro.danyloplaksyvyi.nytimesapp.features.signin.domain.model.SignInState
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
+import pro.danyloplaksyvyi.nytimesapp.utils.RetryButton
 import pro.danyloplaksyvyi.nytimesapp.utils.formatReadableDate
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -143,8 +144,13 @@ fun OverviewScreen(
             }
 
             is OverviewUiState.Error -> {
-                Button(onClick = { overviewViewModel.loadOverview(today) }, shape = RoundedCornerShape(8.dp)) {
-                    Text(stringResource(R.string.retry))
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                    contentAlignment = Alignment.Center
+                ) {
+                    RetryButton { overviewViewModel.loadOverview(today) }
                 }
             }
         }

@@ -17,4 +17,6 @@
     <string name="rank">Ранг: %s</string>
     <string name="buy">Купити</string>
     <string name="retry">Повторити спробу</string>
+    <string name="show_more">Показати</string>
+    <string name="show_less">Приховати</string>
 </resources>

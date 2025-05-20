@@ -8,11 +8,15 @@ import org.json.JSONObject
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.GlobalContext.startKoin
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import pro.danyloplaksyvyi.nytimesapp.features.main.data.api.BooksApiService
-import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.OverviewRepository
-import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.OverviewRepositoryImpl
-import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.booksbylist.BooksByListRepository
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.booksbylist.BooksByListRepositoryImpl
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.overview.OverviewRepository
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.overview.OverviewRepositoryImpl
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.booksbylist.BooksByListViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview.OverviewViewModel
 import pro.danyloplaksyvyi.nytimesapp.features.signin.data.GoogleAuthClient
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 import retrofit2.Retrofit
@@ -29,14 +33,21 @@ class MyApp : Application() {
 }
 
 val appModule = module {
+    // API Key (loaded once and shared)
+    single<String>(qualifier = named("ApiKey")) {
+        androidContext().loadApiKeyFromRaw() ?: throw IllegalStateException("API Key not found")
+    }
+
     // Retrofit & API
     single { provideRetrofit() }
     single<BooksApiService> { get<Retrofit>().create(BooksApiService::class.java) }
 
     // Repository
     single<OverviewRepository> {
-        val apiKey = androidContext().loadApiKeyFromRaw() ?: throw IllegalStateException("API Key not found")
-        OverviewRepositoryImpl(api = get(), apiKey = apiKey)
+        OverviewRepositoryImpl(api = get(), apiKey = get(named("ApiKey")))
+    }
+    single<BooksByListRepository> {
+        BooksByListRepositoryImpl(api = get(), apiKey = get(named("ApiKey")))
     }
 
     // Other dependencies
@@ -45,6 +56,7 @@ val appModule = module {
     // ViewModels
     viewModelOf(::AuthViewModel)
     viewModelOf(::OverviewViewModel)
+    viewModelOf(::BooksByListViewModel)
 }
 
 fun provideRetrofit(): Retrofit {

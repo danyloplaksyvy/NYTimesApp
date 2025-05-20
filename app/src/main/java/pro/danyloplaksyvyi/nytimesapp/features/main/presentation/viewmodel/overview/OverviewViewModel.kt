@@ -1,12 +1,12 @@
-package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel
+package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.OverviewRepository
-import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.Results
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.overview.OverviewRepository
+import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.overview.Results
 
 class OverviewViewModel(
     private val repository: OverviewRepository

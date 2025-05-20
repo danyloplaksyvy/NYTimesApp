@@ -1,4 +1,4 @@
-package pro.danyloplaksyvyi.nytimesapp.features.main.domain.model
+package pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.overview
 
 data class OverviewResponse(
     val status: String,
@@ -33,7 +33,7 @@ data class Book(
     val dagger: Int,
     val primary_isbn13: String,
     val publisher: String,
-    val description: String,
+    val description: String? = null,
     val title: String,
     val author: String,
     val contributor: String,
