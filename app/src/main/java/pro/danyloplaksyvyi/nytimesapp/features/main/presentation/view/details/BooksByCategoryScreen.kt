@@ -1,11 +1,12 @@
 package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view.details
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,19 +15,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,53 +36,99 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import pro.danyloplaksyvyi.nytimesapp.R
-import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.booksbylist.ListResults
+import pro.danyloplaksyvyi.nytimesapp.features.main.domain.model.overview.Book
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.booksbylist.BookListUiState
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.booksbylist.BooksByListViewModel
+import pro.danyloplaksyvyi.nytimesapp.ui.theme.SurfaceLight
+import pro.danyloplaksyvyi.nytimesapp.utils.RetryButton
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-data class Book(
-    val title: String,
-    val author: String,
-    val publisher: String,
-    val rank: Int,
-    val description: String,
-    val buyUrl: String,
-    val imageUrl: String?
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BooksByCategoryScreen(
     navController: NavController,
     listNameEncoded: String,
-    authViewModel: AuthViewModel
+    booksByListViewModel: BooksByListViewModel
 ) {
-    // TODO: load from  VM
-    val books = remember { sampleBooks() }
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { books.size })
+    val uiState by booksByListViewModel.uiState.collectAsState()
+    val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+    LaunchedEffect(today, listNameEncoded) {
+        booksByListViewModel.loadList(today, listNameEncoded)
+    }
 
+    when (uiState) {
+        is BookListUiState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is BookListUiState.Success -> {
+            val results = (uiState as BookListUiState.Success).data
+            val pagerState = rememberPagerState(initialPage = 0, pageCount = { results.books.size })
+            BookByCategoryPage(pagerState, navController, results)
+        }
+
+        is BookListUiState.Error -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                RetryButton { booksByListViewModel.loadList(today, listNameEncoded) }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookByCategoryPage(pagerState: PagerState, navController: NavController, results: ListResults) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
                 modifier = Modifier
-                    .fillMaxWidth()
-                ,
+                    .fillMaxWidth(),
                 title = {
                     Text(
-                        stringResource(R.string.books_in_category, listNameEncoded),
-                        color = MaterialTheme.colorScheme.onSurface
+                        stringResource(R.string.books_in_category, results.list_name),
+                        color = SurfaceLight,
+                        textAlign = TextAlign.Center
                     )
                 },
                 navigationIcon = {
@@ -90,17 +136,9 @@ fun BooksByCategoryScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = SurfaceLight
                         )
                     }
-                },
-                actions = {
-                    Text(
-                        "${pagerState.currentPage + 1}/${pagerState.pageCount}",
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.Transparent.copy(alpha = 0.4f),
@@ -125,7 +163,7 @@ fun BooksByCategoryScreen(
                 flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
             ) { page ->
                 BookPagerItem(
-                    book = books[page],
+                    book = results.books[page],
                     onBuyClick = { /* navController… */ }
                 )
             }
@@ -140,15 +178,27 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Full-screen cover
-        AsyncImage(
-            model = book.imageUrl,
+        // Blurred background
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(book.book_image)
+                .crossfade(true)
+                .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(20.dp)
+        )
+
+        // Foreground image
+        AsyncImage(
+            model = book.book_image,
+            contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay gradient
+        // Gradient overlay
         Box(
             Modifier
                 .fillMaxSize()
@@ -164,11 +214,10 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
                 )
         )
 
-        // Bottom info card
+        // Info Card
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             shape = RoundedCornerShape(16.dp),
@@ -177,48 +226,42 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
         ) {
             Column(
                 Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column {
-                    Text(
-                        text = book.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = "${book.author} • ${book.publisher}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Text(
+                    text = book.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = "${book.author} • ${book.publisher}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Expandable Description
+                book.description?.takeIf { it.isNotBlank() }?.let { description ->
+                    ExpandableText(text = description)
                 }
 
+                // Actions
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onBuyClick) {
-                        Text(stringResource(R.string.buy).uppercase())
+                        Text(stringResource(R.string.buy))
                     }
-                    Row {
-                        IconButton(onClick = { /* favorite */ }) {
-                            Icon(Icons.Filled.FavoriteBorder, "Like")
-                        }
-                        IconButton(onClick = { /* share */ }) {
-                            Icon(Icons.Filled.Share, "Share")
-                        }
-                        IconButton(onClick = { /* bookmark */ }) {
-                            Icon(Icons.Filled.Bookmark, "Bookmark")
-                        }
-                    }
+
                 }
             }
         }
-        Spacer(modifier = Modifier.height(64.dp))
+
         // Rank badge
         Box(
             modifier = Modifier
@@ -234,7 +277,11 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             if (book.rank == 1) {
-                Icon(Icons.Filled.EmojiEvents, "Top Rank", tint = MaterialTheme.colorScheme.onPrimary)
+                Icon(
+                    Icons.Filled.EmojiEvents,
+                    "Top Rank",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             } else {
                 Text(
                     "#${book.rank}",
@@ -246,42 +293,53 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
     }
 }
 
-// Sample data helper
-fun sampleBooks() = listOf(
-    Book(
-        title = "The Haunted Mansion",
-        author = "Boo Author",
-        publisher = "Spooky Press",
-        rank = 1,
-        description = "A thrilling ghost-hunting adventure across creaky corridors and shadowy rooms.",
-        buyUrl = "https://…",
-        imageUrl = "https://picsum.photos/600/400"
-    ),
-    Book(
-        title = "Winds of Winter",
-        author = "Icy Author",
-        publisher = "Northern Tales",
-        rank = 2,
-        description = "A chilling saga set in the frost-bitten realms of the far North.",
-        buyUrl = "https://…",
-        imageUrl = "https://picsum.photos/600/400"
-    ),
-    Book(
-        title = "Winds of Winter",
-        author = "Icy Author",
-        publisher = "Northern Tales",
-        rank = 2,
-        description = "A chilling saga set in the frost-bitten realms of the far North.",
-        buyUrl = "https://…",
-        imageUrl = "https://picsum.photos/600/400"
-    ),
-    Book(
-        title = "Winds of Winter",
-        author = "Icy Author",
-        publisher = "Northern Tales",
-        rank = 2,
-        description = "A chilling saga set in the frost-bitten realms of the far North.",
-        buyUrl = "https://…",
-        imageUrl = "https://picsum.photos/600/400"
+@Composable
+fun ExpandableText(
+    text: String,
+    modifier: Modifier = Modifier,
+    collapsedMaxLines: Int = 3,
+    textStyle: TextStyle = MaterialTheme.typography.bodySmall
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var fullLineCount by remember { mutableIntStateOf(0) }
+
+    // Measure full text (invisible) to get real line count
+    Text(
+        text = text,
+        style = textStyle,
+        onTextLayout = { fullLineCount = it.lineCount },
+        maxLines = Int.MAX_VALUE,
+        overflow = TextOverflow.Clip,
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(0f)
+            .height(0.dp)
     )
-)
+
+    // Show collapsed or expanded text
+    Column(modifier = modifier) {
+        Text(
+            text = text,
+            style = textStyle,
+            maxLines = if (isExpanded) Int.MAX_VALUE else collapsedMaxLines,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.animateContentSize()
+        )
+
+        // Only show toggle if the real line count exceeds collapsedMaxLines
+        if (fullLineCount > collapsedMaxLines) {
+            Text(
+                text = if (isExpanded)
+                    stringResource(R.string.show_less)
+                else
+                    stringResource(R.string.show_more),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    color = MaterialTheme.colorScheme.primary
+                ),
+                modifier = Modifier
+                    .clickable { isExpanded = !isExpanded }
+                    .padding(top = 4.dp)
+            )
+        }
+    }
+}
