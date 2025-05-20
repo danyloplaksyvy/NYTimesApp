@@ -1,5 +1,7 @@
 package pro.danyloplaksyvyi.nytimesapp.features.main.presentation.view.details
 
+import android.net.Uri
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -163,8 +165,7 @@ fun BookByCategoryPage(pagerState: PagerState, navController: NavController, res
                 flingBehavior = PagerDefaults.flingBehavior(state = pagerState)
             ) { page ->
                 BookPagerItem(
-                    book = results.books[page],
-                    onBuyClick = { /* navController… */ }
+                    book = results.books[page]
                 )
             }
         }
@@ -172,7 +173,13 @@ fun BookByCategoryPage(pagerState: PagerState, navController: NavController, res
 }
 
 @Composable
-fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
+fun BookPagerItem(book: Book) {
+    val context = LocalContext.current
+    // Build once
+    val customTabsIntent = remember {
+        CustomTabsIntent.Builder()
+            .build()
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -254,7 +261,9 @@ fun BookPagerItem(book: Book, onBuyClick: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onBuyClick) {
+                    TextButton(onClick = {
+                        customTabsIntent.launchUrl(context, Uri.parse(book.amazon_product_url))
+                    }) {
                         Text(stringResource(R.string.buy))
                     }
 
