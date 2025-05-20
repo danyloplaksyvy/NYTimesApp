@@ -65,7 +65,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.logging.interceptor)
-
+    implementation(libs.retrofit2.converter.gson)
     // Coil
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)

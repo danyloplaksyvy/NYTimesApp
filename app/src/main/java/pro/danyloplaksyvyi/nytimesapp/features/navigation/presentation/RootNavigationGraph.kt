@@ -10,12 +10,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.koin.android.ext.android.inject
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewViewModel
 
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.view.SplashScreen
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 
 @Composable
-fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
+fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel, overviewViewModel: OverviewViewModel) {
     val rootNavController = rememberNavController()
     NavHost(
 //        modifier = modifier,
@@ -27,7 +28,7 @@ fun RootNavigationGraph(modifier: Modifier = Modifier, authViewModel: AuthViewMo
             SplashScreen(authViewModel, rootNavController)
         }
         authNavGraph(rootNavController, authViewModel)
-        mainNavGraph(rootNavController, authViewModel)
+        mainNavGraph(rootNavController, authViewModel, overviewViewModel)
     }
 }
 

@@ -1,12 +1,22 @@
 package pro.danyloplaksyvyi.nytimesapp
 
 import android.app.Application
+import android.content.Context
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import org.json.JSONObject
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.api.BooksApiService
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.OverviewRepository
+import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.OverviewRepositoryImpl
+import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.OverviewViewModel
 import pro.danyloplaksyvyi.nytimesapp.features.signin.data.GoogleAuthClient
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MyApp : Application() {
     override fun onCreate() {
@@ -19,6 +29,48 @@ class MyApp : Application() {
 }
 
 val appModule = module {
+    // Retrofit & API
+    single { provideRetrofit() }
+    single<BooksApiService> { get<Retrofit>().create(BooksApiService::class.java) }
+
+    // Repository
+    single<OverviewRepository> {
+        val apiKey = androidContext().loadApiKeyFromRaw() ?: throw IllegalStateException("API Key not found")
+        OverviewRepositoryImpl(api = get(), apiKey = apiKey)
+    }
+
+    // Other dependencies
     single { GoogleAuthClient(androidContext()) }
+
+    // ViewModels
     viewModelOf(::AuthViewModel)
+    viewModelOf(::OverviewViewModel)
+}
+
+fun provideRetrofit(): Retrofit {
+    // Create logging interceptor
+    val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    // Add to OkHttpClient
+    val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    return Retrofit.Builder()
+        .baseUrl("https://api.nytimes.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(client)
+        .build()
+}
+
+fun Context.loadApiKeyFromRaw(): String? {
+    return try {
+        val inputStream = resources.openRawResource(R.raw.secrets)
+        val json = inputStream.bufferedReader().use { it.readText() }
+        JSONObject(json).getString("nyt_api_key")
+    } catch (e: Exception) {
+        null
+    }
 }

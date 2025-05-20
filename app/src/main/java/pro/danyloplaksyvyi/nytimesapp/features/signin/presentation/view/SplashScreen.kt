@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import pro.danyloplaksyvyi.nytimesapp.R
 import pro.danyloplaksyvyi.nytimesapp.features.navigation.presentation.Graph
-import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.model.SignInState
+import pro.danyloplaksyvyi.nytimesapp.features.signin.domain.model.SignInState
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 
 @Composable

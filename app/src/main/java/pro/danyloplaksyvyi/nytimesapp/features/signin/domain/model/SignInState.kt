@@ -1,4 +1,4 @@
-package pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.model
+package pro.danyloplaksyvyi.nytimesapp.features.signin.domain.model
 
 sealed class SignInState {
     object Idle : SignInState()
