@@ -34,6 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -78,14 +81,20 @@ import java.time.format.DateTimeFormatter
 fun BooksByCategoryScreen(
     navController: NavController,
     listNameEncoded: String,
+    publishedDate: String,
     booksByListViewModel: BooksByListViewModel
 ) {
     val uiState by booksByListViewModel.uiState.collectAsState()
-    val today = LocalDate.now().format(DateTimeFormatter.ISO_DATE)
-    LaunchedEffect(today, listNameEncoded) {
-        booksByListViewModel.loadList(today, listNameEncoded)
-    }
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(publishedDate, listNameEncoded) {
+        booksByListViewModel.loadList(publishedDate, listNameEncoded)
+    }
+    LaunchedEffect(uiState) {
+        if (uiState is BookListUiState.Error) {
+            snackbarHostState.showSnackbar((uiState as BookListUiState.Error).message)
+        }
+    }
     when (uiState) {
         is BookListUiState.Loading -> {
             Box(
@@ -101,7 +110,7 @@ fun BooksByCategoryScreen(
         is BookListUiState.Success -> {
             val results = (uiState as BookListUiState.Success).data
             val pagerState = rememberPagerState(initialPage = 0, pageCount = { results.books.size })
-            BookByCategoryPage(pagerState, navController, results)
+            BookByCategoryPage(pagerState, snackbarHostState, navController, results)
         }
 
         is BookListUiState.Error -> {
@@ -111,7 +120,7 @@ fun BooksByCategoryScreen(
                     .background(MaterialTheme.colorScheme.background),
                 contentAlignment = Alignment.Center
             ) {
-                RetryButton { booksByListViewModel.loadList(today, listNameEncoded) }
+                RetryButton { booksByListViewModel.loadList(publishedDate, listNameEncoded) }
             }
         }
     }
@@ -119,8 +128,17 @@ fun BooksByCategoryScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookByCategoryPage(pagerState: PagerState, navController: NavController, results: ListResults) {
+fun BookByCategoryPage(pagerState: PagerState, snackbarHostState: SnackbarHostState, navController: NavController, results: ListResults) {
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    modifier = Modifier.padding(16.dp)
+                ) { Text(data.visuals.message) }
+            }
+        },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             CenterAlignedTopAppBar(
@@ -130,7 +148,9 @@ fun BookByCategoryPage(pagerState: PagerState, navController: NavController, res
                     Text(
                         stringResource(R.string.books_in_category, results.list_name),
                         color = SurfaceLight,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {

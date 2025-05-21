@@ -1,7 +1,8 @@
-package pro.danyloplaksyvyi.nytimesapp
+package pro.danyloplaksyvyi.nytimesapp.features.di
 
 import android.app.Application
 import android.content.Context
+import androidx.room.Room
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
@@ -10,6 +11,7 @@ import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import pro.danyloplaksyvyi.nytimesapp.R
 import pro.danyloplaksyvyi.nytimesapp.features.main.data.api.BooksApiService
 import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.booksbylist.BooksByListRepository
 import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.booksbylist.BooksByListRepositoryImpl
@@ -17,6 +19,9 @@ import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.overview.Ove
 import pro.danyloplaksyvyi.nytimesapp.features.main.data.repository.overview.OverviewRepositoryImpl
 import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.booksbylist.BooksByListViewModel
 import pro.danyloplaksyvyi.nytimesapp.features.main.presentation.viewmodel.overview.OverviewViewModel
+import pro.danyloplaksyvyi.nytimesapp.features.room.data.AppDatabase
+import pro.danyloplaksyvyi.nytimesapp.features.room.data.MIGRATION_1_2
+import pro.danyloplaksyvyi.nytimesapp.features.room.data.MIGRATION_2_3
 import pro.danyloplaksyvyi.nytimesapp.features.signin.data.GoogleAuthClient
 import pro.danyloplaksyvyi.nytimesapp.features.signin.presentation.viewmodel.AuthViewModel
 import retrofit2.Retrofit
@@ -44,14 +49,42 @@ val appModule = module {
 
     // Repository
     single<OverviewRepository> {
-        OverviewRepositoryImpl(api = get(), apiKey = get(named("ApiKey")))
+        OverviewRepositoryImpl(
+            api = get(),
+            apiKey = get(named("ApiKey")),
+            listDao = get(),
+            bookDao = get(),
+            metadataDao = get()
+        )
     }
     single<BooksByListRepository> {
-        BooksByListRepositoryImpl(api = get(), apiKey = get(named("ApiKey")))
+        BooksByListRepositoryImpl(
+            api = get(),
+            bookDao = get(),
+            listDao = get(),
+            listMetadataDao = get(),
+            apiKey = get(named("ApiKey"))
+        )
     }
 
     // Other dependencies
     single { GoogleAuthClient(androidContext()) }
+
+    // Room Database
+    single {
+        Room.databaseBuilder(
+            get(),
+            AppDatabase::class.java,
+            "app_database"
+        )
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .build()
+    }
+    single { get<AppDatabase>().listDao() }
+    single { get<AppDatabase>().bookDao() }
+    single { get<AppDatabase>().overviewMetadataDao() }
+    single { get<AppDatabase>().listMetadataDao() }
+
 
     // ViewModels
     viewModelOf(::AuthViewModel)

@@ -17,7 +17,7 @@ class BooksByListViewModel(
     fun loadList(date: String, listName: String) = viewModelScope.launch {
         _uiState.value = BookListUiState.Loading
         _uiState.value = try {
-            val resp = repository.fetchList(date, listName)
+            val resp = repository.getBooksForList(date, listName)
             BookListUiState.Success(resp.results)
         } catch (t: Throwable) {
             BookListUiState.Error(t.message ?: "Unknown error")
