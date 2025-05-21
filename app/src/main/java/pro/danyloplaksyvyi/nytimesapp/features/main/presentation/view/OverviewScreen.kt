@@ -62,7 +62,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun OverviewScreen(
     navController: NavController,
-    onCategoryClick: (String) -> Unit,
+    onCategoryClick: (String, String) -> Unit,
     authViewModel: AuthViewModel,
     overviewViewModel: OverviewViewModel,
 ) {
@@ -140,7 +140,7 @@ fun OverviewScreen(
                 OverviewList(
                     modifier = Modifier.padding(padding),
                     results = successState.results,
-                    onCategoryClick = { name -> onCategoryClick(name) })
+                    onCategoryClick = { name -> onCategoryClick(name, successState.results.published_date) })
             }
 
             is OverviewUiState.Error -> {

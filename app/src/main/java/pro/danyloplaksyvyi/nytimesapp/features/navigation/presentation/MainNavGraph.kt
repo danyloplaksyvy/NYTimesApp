@@ -23,17 +23,19 @@ fun NavGraphBuilder.mainNavGraph(
         composable(route = Screens.CategoriesScreen.name) {
             OverviewScreen(
                 navController = navController,
-                onCategoryClick = { name -> navController.navigate("${Screens.CategoryDetailsScreen.name}/$name") },
+                onCategoryClick = { name, publishedDate -> navController.navigate("${Screens.CategoryDetailsScreen.name}/$name/$publishedDate") },
                 authViewModel,
                 overviewViewModel
             )
         }
-        composable(route = "${Screens.CategoryDetailsScreen.name}/{encoded_name}",
+        composable(route = "${Screens.CategoryDetailsScreen.name}/{encoded_name}/{publishedDate}",
             arguments = listOf(
-                navArgument("encoded_name") { type = NavType.StringType }
+                navArgument("encoded_name") { type = NavType.StringType },
+                navArgument("publishedDate") { type = NavType.StringType }
             )) { navBackStackEntry ->
             val encodedName = navBackStackEntry.arguments?.getString("encoded_name") ?: ""
-            BooksByCategoryScreen(navController, encodedName, booksByListViewModel)
+            val publishedDate = navBackStackEntry.arguments?.getString("publishedDate") ?: ""
+            BooksByCategoryScreen(navController, encodedName, publishedDate, booksByListViewModel)
         }
     }
 }

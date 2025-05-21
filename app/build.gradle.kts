@@ -56,12 +56,13 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.navigation.compose.android)
-    implementation(libs.androidx.ui.text.google.fonts)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
-
+    // Navigation
+    implementation(libs.androidx.navigation.compose.android)
+    // Fonts
+    implementation(libs.androidx.ui.text.google.fonts)
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.logging.interceptor)
